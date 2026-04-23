@@ -1,0 +1,35 @@
+# =============================================================================
+# Terraform Variable Overrides — EXAMPLE FILE
+# =============================================================================
+# Copy this file to terraform.tfvars and edit as needed:
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# IMPORTANT: Do NOT put your DigitalOcean API token here!
+# Set it via environment variable instead:
+#   PowerShell:  $env:TF_VAR_do_token = "your-token-here"
+#   Bash/Zsh:    export TF_VAR_do_token="your-token-here"
+# =============================================================================
+
+# --- Droplet Configuration ---
+droplet_name  = "terraform-managed"
+region        = "nyc1"
+droplet_size  = "s-2vcpu-2gb"
+droplet_image = "ubuntu-24-04-x64"
+
+# --- Feature Flags ---
+# droplet_monitoring = true
+# droplet_ipv6       = true
+# droplet_backups    = false   # Adds 20% to droplet cost
+
+# --- Project ---
+project_name        = "terraform-managed"
+project_description = "Infrastructure managed by Terraform"
+environment         = "dev"    # Options: dev, staging, production
+
+# --- SSH Keys ---
+# ssh_key_name         = "terraform-managed-key"
+# ssh_pub_key_path     = "./keys/do_terraform_ed25519.pub"
+# ssh_private_key_path = "./keys/do_terraform_ed25519"
+
+# --- Additional Tags ---
+# tags = ["web", "api"]

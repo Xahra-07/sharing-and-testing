@@ -1,0 +1,84 @@
+#cloud-config
+# =============================================================================
+# Cloud-Init: First-Boot Server Provisioning
+# =============================================================================
+# This script runs automatically on the droplet's first boot. It:
+#   1. Updates all system packages
+#   2. Installs essential tools and Docker
+#   3. Configures UFW firewall
+#   4. Enables fail2ban for SSH brute-force protection
+#   5. Sets timezone and basic system hardening
+# =============================================================================
+
+# --- System Package Updates ---
+package_update: true
+package_upgrade: true
+
+# --- Install Packages ---
+packages:
+  - curl
+  - wget
+  - git
+  - htop
+  - unzip
+  - jq
+  - ufw
+  - fail2ban
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - lsb-release
+  - software-properties-common
+
+# --- Run Commands on First Boot ---
+runcmd:
+  # ---- Docker Installation (Official Method) ----
+  - mkdir -p /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - apt-get update -y
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - systemctl enable docker
+  - systemctl start docker
+
+  # ---- UFW Firewall Configuration ----
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp    # SSH
+  - ufw allow 80/tcp    # HTTP
+  - ufw allow 443/tcp   # HTTPS
+  - ufw --force enable
+
+  # ---- fail2ban Configuration ----
+  - |
+    cat > /etc/fail2ban/jail.local << 'EOF'
+    [DEFAULT]
+    bantime  = 3600
+    findtime = 600
+    maxretry = 5
+
+    [sshd]
+    enabled = true
+    port    = ssh
+    filter  = sshd
+    logpath = /var/log/auth.log
+    maxretry = 3
+    EOF
+  - systemctl enable fail2ban
+  - systemctl restart fail2ban
+
+  # ---- System Hardening ----
+  # Disable root password login (SSH key only)
+  - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+  - sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+  - systemctl restart sshd
+
+# --- Set Timezone ---
+timezone: America/New_York
+
+# --- Final Reboot (apply all updates cleanly) ---
+power_state:
+  mode: reboot
+  message: "Cloud-init provisioning complete. Rebooting..."
+  timeout: 30
+  condition: true

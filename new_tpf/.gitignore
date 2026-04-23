@@ -1,0 +1,36 @@
+# =============================================================================
+# Terraform .gitignore
+# =============================================================================
+
+# --- Terraform ---
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# --- Sensitive Files ---
+# Variable files may contain sensitive data (though token should be env var)
+*.tfvars
+*.tfvars.json
+
+# --- SSH Keys (CRITICAL — never commit private keys) ---
+keys/
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
