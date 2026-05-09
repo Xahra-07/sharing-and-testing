@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.18'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 17
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact("build/libs/java-app-1.0-SNAPSHOT.jar")
+        }
+    }
+    
+    repositories {
+    maven {
+        name = 'nexus'
+        url = 'http://3.83.251.146:8081/repository/maven-snapshots/'
+        allowInsecureProtocol = true
+        credentials {
+            username project.repoUser
+            password project.repoPassword
+        }
+    }
+}
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '5.2'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}
